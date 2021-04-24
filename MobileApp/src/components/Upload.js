@@ -10,6 +10,7 @@ export default class Upload extends Component {
   state = {
     photo: null,
     image: true,
+    photoName : null,
   }
 
   
@@ -57,13 +58,13 @@ export default class Upload extends Component {
     //   body: createFormData(this.state.photo)
     // })
       .then(response => {
-        console.log("SSSS");
-        console.log("upload succes", response);
-        alert("Upload success!");
-        this.setState({ photo: null });
+        this.setState({photoName : response.data })
+        alert(this.state.photoName);
+        console.log(this.state.photoName)
+        // this.setState({ photo: null });
+        
       })
       .catch(error => {
-        console.log("aaaa");
         console.log("upload error", error);
         alert("Upload failed!");
       });
@@ -72,6 +73,7 @@ export default class Upload extends Component {
   render() {
     const { photo } = this.state
     const { image } = this.state
+    const { photoName } = this.state
     return (
 
           <View style={{flex: 1}}>
@@ -96,6 +98,11 @@ export default class Upload extends Component {
             <Button title="Upload" onPress={this.UploadImage} />
           </React.Fragment>
         )}
+
+{/* {photoName && (
+  <Text style={{}}>{photoName}</Text>
+  )} */}
+
     </View>
     <View style={{height: 100, backgroundColor: 'white', }}>
     {/* <Button title="Camera" onPress={this.clickImage} /> */}
