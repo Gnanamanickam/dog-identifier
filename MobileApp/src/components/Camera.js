@@ -1,173 +1,182 @@
+import React, { Component } from 'react'
+import { View, Text, Image, Button,  StyleSheet, Spacer, ImageBackground } from 'react-native'
+import * as ImagePicker from "react-native-image-picker"
+import * as Permissions from 'react-native';
+import axios from "axios";
 
-import React, { Component } from 'react';
-import {
-  StyleSheet,
-  View,
-  StatusBar,
-  Dimensions,
-  TouchableOpacity
-} from 'react-native';
-import RNCamera from 'react-native-camera';
-import { Icon } from 'native-base';
-import { dirPicutures } from './dirStorage';
-const moment = require('moment');
 
-let { height, width } = Dimensions.get('window');
-let orientation = height > width ? 'Portrait' : 'Landscape';
-
-const moveAttachment = async (filePath, newFilepath) => {
-  return new Promise((resolve, reject) => {
-    RNFS.mkdir(dirPicutures)
-      .then(() => {
-        RNFS.moveFile(filePath, newFilepath)
-          .then(() => {
-            resolve(true);
-          })
-          .catch(error => {
-            console.log('error', error);
-            reject(error);
-          });
-      }) 
-      .catch(err => {
-        console.log('file path not created error', err);
-        reject(err);
-      });
-  });
-};
-
-class Camera extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      orientation
-    };
+export default class Upload extends Component {
+  state = {
+    photo: null,
+    image: true,
+    photoName : null,
   }
 
-  componentWillMount() {
-    Dimensions.addEventListener('change', this.handleOrientationChange);
-  }
-
-  componentWillUnmount() {
-    Dimensions.removeEventListener('change', this.handleOrientationChange);
-  }
-
-  handleOrientationChange = dimensions => {
-    ({ height, width } = dimensions.window);
-    orientation = height > width ? 'Portrait' : 'Landscape';
-    this.setState({ orientation });
+  
+launchCamera = () => {
+  let options = {
+    storageOptions: {
+      skipBackup: true,
+      path: 'images',
+    },
   };
-
-  saveImage = async filePath => {
-    try {
-      const imageName = `${moment().format('Dog')}.jpg`;
-      const newFilepath = `${dirPicutures}/${imageName}`;
-      await moveAttachment(filePath, newFilepath);
-
-    } catch (error) {
-      console.log(error);
+  ImagePicker.launchCamera(options, (response) => {
+    if (response.uri) {
+      this.setState({ photo: response })
+      this.setState({image: null})
     }
-  };
+  
+  });
 
-  takePicture() {
-    this.camera
-      .capture()
-      .then(data => {
-        this.saveImage(data.path);
-      })
-      .catch(err => {
-        console.error('Capture Picture Error', err);
-      });
+}
+
+
+  selectImage = () => {
+    const options = {
+      noData: true,
+    }
+    ImagePicker.launchImageLibrary(options, response => {
+      if (response.uri) {
+        this.setState({ photo: response })
+        this.setState({image: null})
+      }
+    })
   }
+
+  UploadImage = () => {
+    
+    axios
+    .post("http://10.0.2.2:5000/image", createFormData(this.state.photo),{
+      headers: {
+        'Content-Type': this.state.photo.type
+      }
+    })
+ 
+      .then(response => {
+        this.setState({photoName : response.data })
+        alert(this.state.photoName);
+        console.log(this.state.photoName)
+        // this.setState({ photo: null });
+        
+      })
+      .catch(error => {
+        console.log("upload error", error);
+        alert("Upload failed!");
+      });
+  };
 
   render() {
+    const { photo } = this.state
+    const { image } = this.state
+    const { photoName } = this.state
     return (
-      <View style={{ flex: 1 }}>
-        <StatusBar barStyle="light-content" translucent />
 
-        <RNCamera
-          captureTarget={camera.constants.CaptureTarget.disk}
-          ref={ cam => {
-            this.camera = cam;
-          }}
-          style={styles.container}
-          aspect={camera.constants.Aspect.fill}
-          orientation="auto"
-        >
-          <View
-            style={
-              this.state.orientation === 'Portrait' ? (
-                styles.buttonContainerPortrait
-              ) : (
-                styles.buttonContainerLandscape
-              )
-            }
-          >
-            <TouchableOpacity
-              onPress={() => this.takePicture()}
-              style={
-                this.state.orientation === 'Portrait' ? (
-                  styles.buttonPortrait
-                ) : (
-                  styles.buttonLandscape
-                )
-              }
-            >
-              <Icon name="camera" style={{ fontSize: 40, color: 'white' }} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => this.props.navigation.goBack()}
-              style={
-                this.state.orientation === 'Portrait' ? (
-                  styles.buttonPortrait
-                ) : (
-                  styles.buttonLandscape
-                )
-              }
-            >
-              <Icon
-                name="close-circle"
-                style={{ fontSize: 40, color: 'white' }}
-              />
-            </TouchableOpacity>
-          </View>
-        </RNCamera>
-      </View>
-    );
+          <View style={{flex: 1}}>
+      <View style={{flexGrow: 1, backgroundColor: 'grey', alignItems: 'center'}}>
+      <Text style={{}}>Dog Identifier</Text>
+      {image && (
+      < Image
+        source={require('../images/dog.jpg')} 
+        style={{
+          position: 'absolute',
+            width: '100%',
+            height: '100%',
+            aspectRatio: 1,
+        
+        }}      /> )}
+{photo && (
+          <React.Fragment>
+            <Image
+              source={{ uri: photo.uri }}
+              style={{ width: 300, height: 300 }}
+            />
+            <Button title="Upload" onPress={this.UploadImage} />
+          </React.Fragment>
+        )}
+
+
+    </View>
+    <View style={{height: 100, backgroundColor: 'white', }}>
+    <Button title="Camera" onPress={this.launchCamera} />
+    
+    <Button title="Gallery" onPress={this.selectImage} />
+    </View>
+  </View>
+
+    )
   }
+}
+
+const askForPermission = async () => {
+  const permissionResult = await Permissions.askAsync(Permissions.CAMERA)
+  if (permissionResult.status !== 'granted') {
+    Alert.alert('Permission Denied', [{ text: 'ok' }])
+    return false
+  }
+  return true
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    paddingTop: 50,
   },
-  buttonContainerPortrait: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)'
+  stretch: {
+    width: 50,
+    height: 200,
+    resizeMode: 'stretch',
   },
-  buttonContainerLandscape: {
-    position: 'absolute',
-    bottom: 0,
-    top: 0,
-    right: 0,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
-  },
-  buttonPortrait: {
-    backgroundColor: 'transparent',
-    padding: 5,
-    marginHorizontal: 20
-  },
-  buttonLandscape: {
-    backgroundColor: 'transparent',
-    padding: 5,
-    marginVertical: 20
-  }
 });
 
-export default Camera;
+const fd = new FormData();
+
+const createFormData = (photo, body) => {
+  const data = new FormData();
+  data.append("file", photo.uri);
+console.log(photo);
+
+  return data;
+};
+  const headers = {
+    accept : "image/jpeg",
+  };
+
+
+
+
+  /* <View style={{ flex: 1}}>
+      <ImageBackground
+      source={require('../images/dog.jpg')}
+      style={{
+        position: 'absolute',
+          width: '100%',
+          height: '100%',
+          aspectRatio: 1,   
+      }} 
+    >
+      <Spacer size={200} />
+      <View>
+      <View style={{flex: 1}}>
+          <Button
+            title={'Camera'}
+            icon={{ name: 'lock' }}
+            onPress={this.selectImage}
+          />
+        </View>
+      </View>
+
+      <Spacer size={10} />
+
+
+      <View>
+      <View style={{flex: 1}}>
+          <Button
+            title={'Gallery'}
+            backgroundColor={'#FB6567'}
+            icon={{ name: 'face' }}
+            onPress={this.selectImage}
+          />
+        </View>
+      </View>
+
+    </ImageBackground>
+    </View> */

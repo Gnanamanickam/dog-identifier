@@ -17,6 +17,6 @@ def handle_request():
     # filename = werkzeug.utils.secure_filename(imagefile.filename)
     # print("\nReceived image File name : " + imagefile.filename)
     # imagefile.save("image.jpg")
-    return "Send the dog name here"
+    return "Golden Retreiver"
 
 app.run(host="127.0.0.1", port=5000, debug=True)
