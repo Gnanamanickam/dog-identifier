@@ -80,4 +80,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export { styles }
+export default styles;

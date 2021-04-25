@@ -11,20 +11,20 @@ import numpy as np
 
 app = flask.Flask(__name__)
 classifier = Classifier()
+model = classifier.get_model()
 UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+labels = ['Afghan_hound', 'Blenheim_spaniel', 'Chihuahua', 'Japanese_spaniel', 'Maltese_dog', 'Pekinese', 'Tzu', 'basset', 'papillon', 'toy_terrier']
 
 
-def process_inout_image(image):
-    print(type(image))
-    img = cv2.imread(image)
-    print(img)
+def process_inout_image():
+    img = cv2.imread("image.jpg")
     img = cv2.resize(img, (150, 150))
     return np.array(img)/255
 
 def do_prediction(img):
-    prediction = classifier.predict(img.reshape(-1, 150, 150, 3))
+    prediction = model.predict(img.reshape(-1, 150, 150, 3))
     return np.argmax(prediction)
 
 def stringToImage(base64_string):
@@ -40,10 +40,7 @@ def home():
 def handle_request():
     if flask.request.method == 'POST': 
         image = stringToImage(flask.request.form['file'])
-        # print(image)
-        # return do_prediction(process_inout_image(image))
-
         image.save("image.jpg")
-        return "Golden Retreiver"
+        return labels[do_prediction(process_inout_image())]
 
 app.run(host="127.0.0.1", port=5000, debug=True)

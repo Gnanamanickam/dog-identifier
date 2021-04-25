@@ -47,7 +47,7 @@ export default class Upload extends Component {
     ImagePicker.launchCamera(options, (response) => {
       if (response.uri) {
         this.setState({ photo: response })
-        console.logt(this.state.photo.base64);
+        console.log(this.state.photo.base64);
         this.setState({ image: null })
       }
 
