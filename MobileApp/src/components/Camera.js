@@ -3,7 +3,7 @@ import { View, Text, Image, Button, StyleSheet, Spacer, ImageBackground } from '
 import * as ImagePicker from "react-native-image-picker"
 import * as Permissions from 'react-native';
 import axios from "axios";
-// import AppIntroSlider from 'react-native-app-intro-slider';
+import AppIntroSlider from 'react-native-app-intro-slider';
 import Icon from 'react-native-vector-icons';
 // import { createStackNavigator, createAppContainer } from 'react-navigation'; 
 
@@ -28,7 +28,7 @@ export default class Upload extends Component {
     photo: null,
     image: true,
     photoName: null,
-    displayApp: true,
+    displayApp: false,
   }
 
 
@@ -138,13 +138,13 @@ export default class Upload extends Component {
 
       )
     }
-    // else {
-    //   return (
-    //     <AppIntroSlider slides={slides} onDone={this.onSlidesDone}
-    //       showSkipButton={true}
-    //       onSkip={this.onSlidesSkip} />
-    //   );
-    // }
+    else {
+      return (
+        <AppIntroSlider renderItem={RenderItem} data={slides} onDone={this.onSlidesDone}
+          showSkipButton={true}
+          onSkip={this.onSlidesSkip} />
+      );
+    }
   }
 }
 
@@ -193,10 +193,46 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
   },
+
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    padding: 10,
+    justifyContent: 'center',
+  },
+  titleStyle: {
+    padding: 10,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  paragraphStyle: {
+    padding: 20,
+    textAlign: 'center',
+    fontSize: 16,
+  },
+
+  introTextStyle: {
+    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
+    paddingVertical: 30,
+    fontWeight: 'bold'
+  },
+  introTitleStyle: {
+    fontSize: 25,
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontWeight: 'bold',
+  },
+  
   image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain'
+    width: 500,
+    height: 450,
+    resizeMode: 'contain',
   }
 });
 
@@ -204,7 +240,7 @@ const fd = new FormData();
 
 const createFormData = (photo, body) => {
   const data = new FormData();
-  data.append("file", photo.uri);
+  data.append("file", photo);
   console.log(photo);
 
   return data;
@@ -215,18 +251,35 @@ const headers = {
   accept: "image/jpeg",
 };
 
+const RenderItem = ({ item }) => {
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#ff7f50',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        paddingBottom: 30,
+      }}>
+      <Text style={styles.title}>{item.title}</Text>
+      <Image style={styles.image} source={item.image} />
+      <View style={styles.space} />
+      <Text style={styles.introTextStyle}>{item.text}</Text>
+    </View>
+  );
+};
+
 const slides = [
   {
     key: 'k1',
-    title: 'Dog Breed Identifier',
-    text: 'Upload a clean image to identify the dog breed',
-    image: {
-      uri:
-        'https://in.pinterest.com/pin/803048177286791297/',
-    },
+    title: 'DOG BREED IDENTIFIER',
+    text: 'Upload A Clean Image To Identify The Dog Breed',
+    image: require('../images/dogSlide.png'),
     titleStyle: styles.title,
     textStyle: styles.text,
     imageStyle: styles.image,
     backgroundColor: '#F7BB64',
   },
+
+  
 ];
