@@ -3,6 +3,10 @@ import { View, Text, Image, Button, StyleSheet, Spacer, ImageBackground } from '
 import * as ImagePicker from "react-native-image-picker"
 import * as Permissions from 'react-native';
 import axios from "axios";
+import imageToBase64 from 'image-to-base64/browser';
+// import RNFetchBlob from 'rn-fetch-blob';
+// import RNFS from 'react-native-fs';
+// import fs from 'fs'
 import AppIntroSlider from 'react-native-app-intro-slider';
 import Icon from 'react-native-vector-icons';
 // import { createStackNavigator, createAppContainer } from 'react-navigation'; 
@@ -34,14 +38,16 @@ export default class Upload extends Component {
 
   launchCamera = () => {
     let options = {
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
+      includeBase64: true,
+      // storageOptions: {
+      //   skipBackup: false,
+      //   path: 'images',
+      // },
     };
     ImagePicker.launchCamera(options, (response) => {
       if (response.uri) {
         this.setState({ photo: response })
+        console.logt(this.state.photo.base64);
         this.setState({ image: null })
       }
 
@@ -52,11 +58,12 @@ export default class Upload extends Component {
 
   selectImage = () => {
     const options = {
-      noData: true,
+      includeBase64: true,
     }
     ImagePicker.launchImageLibrary(options, response => {
       if (response.uri) {
         this.setState({ photo: response })
+        console.log(this.state.photo.base64);
         this.setState({ image: null })
       }
     })
@@ -65,9 +72,9 @@ export default class Upload extends Component {
   UploadImage = () => {
 
     axios
-      .post("http://10.0.2.2:5000/image", createFormData(this.state.photo), {
+      .post("http://10.0.2.2:5000/image", createFormData(this.state.photo.base64), {
         headers: {
-          'Content-Type': this.state.photo.type
+          'Content-Type': "multipart/form-data"
         }
       })
 
@@ -236,11 +243,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const fd = new FormData();
-
-const createFormData = (photo, body) => {
+const createFormData = (photo) => {
   const data = new FormData();
-  data.append("file", photo);
+  data.append("file",photo);
   console.log(photo);
 
   return data;
@@ -268,6 +273,7 @@ const RenderItem = ({ item }) => {
     </View>
   );
 };
+
 
 const slides = [
   {
