@@ -25,7 +25,10 @@ def process_inout_image():
 
 def do_prediction(img):
     prediction = model.predict(img.reshape(-1, 150, 150, 3))
-    return np.argmax(prediction)
+    arg = np.argmax(prediction)
+    print(prediction)
+    score = prediction[:,arg]
+    return arg, score[0]*100
 
 def stringToImage(base64_string):
     imgdata = base64.b64decode(base64_string)
@@ -41,6 +44,9 @@ def handle_request():
     if flask.request.method == 'POST': 
         image = stringToImage(flask.request.form['file'])
         image.save("image.jpg")
-        return labels[do_prediction(process_inout_image())]
-
+        arg, score = do_prediction(process_inout_image())
+        if(score > 35):
+            return str(labels[arg]) + " | Confidence {:.2f}%".format(score)
+        else:
+            return "We dont think you uploaded a Dog image :("
 app.run(host="127.0.0.1", port=5000, debug=True)

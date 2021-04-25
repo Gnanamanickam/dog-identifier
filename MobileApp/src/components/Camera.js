@@ -115,6 +115,7 @@ export default class Upload extends Component {
                   position: 'absolute',
                   width: '100%',
                   height: '100%',
+                  resizeMode: 'contain',
                   aspectRatio: 1,
 
                 }}
@@ -125,7 +126,7 @@ export default class Upload extends Component {
                 <View style={styles.space} />
                 <Image
                   source={{ uri: photo.uri }}
-                  style={{ width: 300, height: 450 }}
+                  style={{ width: 400, height: 450, resizeMode: 'contain', }}
                 />
                 <View style={styles.space} />
                 <View style={styles.space} />
