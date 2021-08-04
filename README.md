@@ -1,1 +1,1 @@
-# dog-identifier
+A react native app which aims to identify the breed of the dog on either uploading the dog image or by clicking the picture . The breed of the dog is found using a machine learning algorithm which builds a classification and clustering model which uses a dataset that contains a images of the all the dog breeds . The models are aimed at classifying the a given dog image into its right breed and clustering similar looking dogs to gain intuition. This project is done as a part of Data Science course work .
